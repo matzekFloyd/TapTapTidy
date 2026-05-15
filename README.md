@@ -55,7 +55,41 @@ Copy `.env.example` → `.env` and set the key from `supabase status`. **Do not 
 
 Ports are configured in [`supabase/config.toml`](supabase/config.toml) (API `54331`, DB `54332`, Studio `54333`). If `supabase start` reports a port conflict, change those values or stop the other stack using the same ports.
 
-Schema and migrations live in [`supabase/migrations/`](supabase/migrations/). After changing migrations: `supabase db reset`.
+Schema and migrations live in [`supabase/migrations/`](supabase/migrations/).
+
+### Database migrations
+
+- Add new files under [`supabase/migrations/`](supabase/migrations/) using the CLI (`supabase migration new <name>`) or matching the timestamped naming convention.
+- **`supabase db reset`** tears down local Postgres and reapplies migrations (and [`supabase/seed.sql`](supabase/seed.sql) if `[db.seed]` is enabled). Use this after editing SQL so local state matches the repo.
+- With the stack stopped, you can also run **`supabase start`**; migrations apply on first boot. After changes, **`supabase db reset`** is the usual way to confirm everything applies cleanly.
+- Row Level Security and policies on **domain tables** arrive with later schema tickets; this repo’s first migration intentionally avoids `public` app tables until that design is finalized.
+
+Local **Auth** (Studio → Authentication → URL configuration): keep **Site URL** aligned with where you load the SPA (for example `http://127.0.0.1:5173` for Vite, or `http://localhost:5173`). Add the same origins under **Redirect URLs** if you use magic links or OAuth later. Confirm whether **Confirm email** is required for testing; Mailpit/Inbucket shows signup mail when email confirmation is enabled locally.
+
+### Hosted Supabase (apply migrations remotely)
+
+Same SQL in [`supabase/migrations/`](supabase/migrations/) should run on your **hosted** project when you’re ready ([Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) required).
+
+**One-time per machine / project:**
+
+```sh
+npm run supabase:remote:login
+npm run supabase:remote:link -- --project-ref <REFERENCE_ID>
+```
+
+`<REFERENCE_ID>` is under **Dashboard → Project Settings → General**. The CLI may prompt for the **database password** (never commit it). Link state stays local.
+
+**Whenever you want to ship migrations:**
+
+```sh
+npm run supabase:remote:push
+```
+
+That runs [`scripts/supabase-remote-push.mjs`](scripts/supabase-remote-push.mjs): prints migration status, asks for confirmation, then runs `supabase db push` against the linked project.
+
+Direct CLI equivalents: `npm run supabase:remote:migrations`, `npm run supabase:remote:push:cli`.
+
+Point the **app** at hosted data with `PUBLIC_SUPABASE_*` from **Project Settings → API** (different from CLI link — used by Vite/SvelteKit).
 
 ## Scripts
 
@@ -70,6 +104,12 @@ Schema and migrations live in [`supabase/migrations/`](supabase/migrations/). Af
 | `npm run supabase:start` | Start local Supabase (Docker) |
 | `npm run supabase:stop` | Stop local Supabase |
 | `npm run supabase:status` | Show local URLs and keys |
+| `npm run supabase:db:reset` | Recreate local DB and reapply migrations |
+| `npm run supabase:remote:login` | Supabase CLI login (hosted projects) |
+| `npm run supabase:remote:link` | Link CLI to a hosted project (`--project-ref`) |
+| `npm run supabase:remote:migrations` | List local vs linked remote migration status |
+| `npm run supabase:remote:push` | Confirm, then push pending migrations (see Hosted Supabase above) |
+| `npm run supabase:remote:push:cli` | Run `supabase db push` without the confirmation script |
 
 ## Styling
 
