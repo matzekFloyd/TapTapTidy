@@ -1,0 +1,292 @@
+================================================================================
+Tap Tap Tidy — Product spec, schema, staleness model, and implementation tickets
+================================================================================
+This file captures agreements from design discussion (routine tracking, recurring
+routines, groups, derived colours, performance). Update constants and schema
+field names to match your actual stack (Sanity, SQL, etc.).
+
+--------------------------------------------------------------------------------
+1. PRODUCT OVERVIEW
+--------------------------------------------------------------------------------
+- Routine tracking for things that should happen regularly (not one-off todos):
+  gym, admin, home upkeep, etc. Domain language: “routine”, not “chore”.
+- Routine groups are defined by the product (you): a fixed catalog stored as
+  read-only DB rows seeded by migration — users cannot create, rename, or
+  delete groups.
+- Users only create routines and assign each routine to one of these groups (groupId).
+- Roughly 6–12 groups; UI goal: all groups visible on one mobile screen without
+  scrolling; tapping a group shows its routines.
+- Each routine has an interval (how often it should be done). Staleness is derived
+  from time since last completion vs that interval.
+- Group appearance reflects its routines: aggregate from per-routine staleness states.
+- Users do NOT set explicit thresholds; phase boundaries are computed from
+  interval only, using fixed ratios in application code (versioned constants).
+
+--------------------------------------------------------------------------------
+2. DATA SCHEMA (SOURCE OF TRUTH IN DB)
+--------------------------------------------------------------------------------
+
+2.0 Identity (users)
+  - Authenticated subject: userId (string — stable id from your auth provider,
+    e.g. Supabase/Auth0/Clerk/Firebase uid). Every API and query scopes data to
+    the signed-in user unless you later introduce shared households (see E2).
+  - RoutineGroup catalog has no userId (global to the app).
+  - Routines and completions are user-scoped (see below) so one account cannot
+    read or mutate another’s rows.
+
+2.1 RoutineGroup (catalog — not user-created)
+  - Stable id (string): prefer a slug/key (e.g. "body", "space", "other") so the
+    client and server agree even if copy changes; uuid also fine if immutable.
+  - name (string) — display label
+  - description (string, optional) — longer copy, tooltips, or first-run help;
+    empty if unused. Cap length in seed migration / API (same order of magnitude
+    as routines).
+  - Icons: not required in the DB for v1. Prefer a static map in the app
+    RoutineGroup.id → icon component or asset (everything bundled with the client).
+    Optional: add an iconKey column to the catalog only if you want migrations to
+    switch among a fixed set of keys already shipped in the app (still no
+    arbitrary remote images unless you add that product).
+  - Storage: read-only rows in the database, inserted and updated only via
+    migrations (and/or a trusted admin path — never exposed as “create group”
+    in the user UI). App and RLS should block end-user INSERT/UPDATE/DELETE on
+    the group catalog table.
+  - Do not model “user-owned groups”; ownership applies to routines only.
+
+2.2 Routine
+  - id (string/uuid)
+  - userId (string, required) — owner of this routine row; must match the
+    authenticated user on create and on all reads/updates/deletes.
+  - groupId (reference to RoutineGroup)
+  - title (string)
+  - description (string, optional) — longer notes; empty/null if unused. Cap
+    length in API/UI (e.g. 500–2000 chars) to avoid abuse.
+  - intervalDays (number) — user-facing “do every N days”; internally convert
+    to hours for calculations (see section 4)
+  - lastCompletedAt (timestamp, optional, UTC) — DENORMALIZED for fast reads;
+    update whenever a new completion is recorded. Source of truth remains the
+    completion log if you keep one.
+  - archivedAt, createdAt, updatedAt
+
+2.3 RoutineCompletion (append-only history)
+  - id (string/uuid)
+  - routineId (reference to Routine)
+  - userId (string, required) — same as Routine.userId for v1; enforce that the
+    parent Routine belongs to this user (reject cross-user writes).
+  - completedByUserId (string, optional) — who performed the action if it can
+    differ later (e.g. household member taps “done” on a shared routine). For v1
+    you may omit and treat this as equal to userId, or set it equal on every
+    insert for forward compatibility.
+  - completedAt (timestamp, UTC)
+  - On insert: update Routine.lastCompletedAt to this completedAt if it is the new
+    latest (by time).
+  - v1 omits a “source” / provenance field (tap vs undo vs import); add only if
+    you need analytics or more nuanced undo than deleting the latest row (see E4).
+
+NOT stored in DB (derived at read/render time):
+  - Colour tokens, staleness band index, group aggregate colour — these depend
+    on “now” and must be computed, not persisted as long-lived truth.
+  - List / grid display order for groups and for routines within a group — sort
+    client-side (or when shaping an API response) by name, by derived staleness
+    severity, or a user-selected mode; no sortOrder column.
+
+--------------------------------------------------------------------------------
+3. VISUAL STALENESS TOKENS (10 STATES)
+--------------------------------------------------------------------------------
+Map each token to a concrete colour in the design system (hex/RGB).
+
+  - unknown     — Grey. No reliable last completion (never done, or policy says
+                 unmeasured — define rule explicitly in app).
+
+  - ok.strong   — Green shade 1 (e.g. earliest / freshest part of OK band)
+  - ok.mid      — Green shade 2
+  - ok.weak     — Green shade 3 (still OK but nearing neutral)
+
+  - neutral.1   — Yellow/orange shade 1
+  - neutral.2   — Yellow/orange shade 2
+  - neutral.3   — Yellow/orange shade 3 (last warning before overdue)
+
+  - overdue.1   — Red shade 1 (just past interval)
+  - overdue.2   — Red shade 2
+  - overdue.3   — Red shade 3 (well past interval; tail unbounded)
+
+Severity ordering for aggregation: treat unknown as worst or special-case per
+product decision; then overdue.3 > overdue.2 > overdue.1 > neutral.3 > … >
+ok.strong.
+
+--------------------------------------------------------------------------------
+4. STALENESS CALCULATION (HOUR-BASED, FROM INTERVAL ONLY)
+--------------------------------------------------------------------------------
+
+4.1 Internal interval
+  I_hours = intervalDays * 24
+  Use a consistent representation (e.g. ms from epoch for instants).
+
+4.2 Elapsed time
+  T_hours = (nowUtc - lastCompletedAt) converted to hours (fractional allowed).
+  If lastCompletedAt is missing: token = unknown (unless you define another
+  rule, e.g. “born unknown” only when never completed).
+
+4.3 Fixed ratio constants (not in DB; live in code — tune in one place)
+  Example from discussion:
+  - neutralStartRatio = 0.65
+    Neutral phase runs from (neutralStartRatio * I_hours) until overdue start.
+  - Overdue starts when T_hours >= I_hours.
+
+  OK band:        0 <= T < neutralStartRatio * I
+    Split into 3 equal sub-bands → ok.strong, ok.mid, ok.weak
+
+  Neutral band:   neutralStartRatio * I <= T < I
+    Split into 3 equal sub-bands → neutral.1, neutral.2, neutral.3
+
+  Overdue band:   T >= I
+    Split into 3 sub-bands using extra multiples of I (example):
+    - overdue.1: I <= T < 1.15 * I
+    - overdue.2: 1.15 * I <= T < 1.4 * I
+    - overdue.3: T >= 1.4 * I
+    Adjust 1.15 and 1.4 in code until overdue escalation feels right.
+
+4.4 Hours vs calendar days
+  Prefer instant difference → hours for sub-day intervals and smooth behaviour.
+  If you later want “calendar days in user timezone”, that is a different rule
+  set (explicit local-midnight boundaries); not assumed here.
+
+--------------------------------------------------------------------------------
+5. GROUP AGGREGATE COLOUR / STATUS
+--------------------------------------------------------------------------------
+- Compute each routine’s staleness token from section 4.
+- Reduce group status: recommended “worst routine wins” — group reflects the most
+  severe token among its routines (define tie-break and unknown handling).
+- Group colour is not stored; derived like routine colour.
+
+--------------------------------------------------------------------------------
+6. PERFORMANCE NOTES
+--------------------------------------------------------------------------------
+- Per-routine math is O(1); optimize I/O and refresh frequency, not the formula.
+- Denormalize lastCompletedAt on Routine; avoid per-routine “latest completion”
+      queries on every load.
+- Load groups + routines in one batch (no N+1).
+- Do not drive recomputation from Date.now() every frame; use a single tick
+  (e.g. every minute) and/or recompute on screen focus, app resume.
+- Memoize per-routine token on (lastCompletedAt, intervalDays, nowTick); memoize
+  group aggregate when child tokens change.
+- Optional later: for notifications/cron, store “next status change at” times
+  instead of caching colour in DB.
+
+--------------------------------------------------------------------------------
+7. IMPLEMENTATION TICKETS
+--------------------------------------------------------------------------------
+Group related work under epics as needed. Order is suggestive.
+
+--- Epic A: Data model & persistence ---
+
+[Ticket A1] RoutineGroup catalog — schema
+  - Add read-only catalog table (or equivalent) for RoutineGroup: id, name,
+    optional description, optional iconKey (only if you use DB-driven icon keys).
+  - RLS or equivalent: authenticated users SELECT only; no end-user INSERT/UPDATE/DELETE.
+  - Routine.groupId (or FK) must reference this catalog.
+
+[Ticket A2] RoutineGroup catalog — seed data
+  - Add migration(s) with idempotent INSERTs (or upserts) for the fixed group set
+    (id, name, optional description).
+  - Document release process: adding/changing a group = new migration adjusting
+    seed rows (and app icon map if ids change).
+  - Decide icon strategy: client-only map by group id vs optional iconKey values
+    in seed data.
+
+[Ticket A3] Schema: Routine
+  - Add Routine with userId (required, owner), groupId (must reference catalog id),
+    title, description (optional), intervalDays, lastCompletedAt (nullable),
+    archivedAt optional.
+  - Validate groupId against known catalog on create/update (reject unknown ids).
+  - Index or query pattern: list by (userId), and by (userId, groupId).
+
+[Ticket A4] Schema: RoutineCompletion + write path
+  - Add RoutineCompletion log with userId (and optional completedByUserId); on
+    insert, verify routine.userId matches; update Routine.lastCompletedAt to latest
+    completedAt.
+  - Define undo/delete policy if user removes mistaken completion.
+
+[Ticket A5] Migrations / Sanity types
+  - Implement schema in chosen backend; indexes on Routine: userId, (userId, groupId);
+    on RoutineCompletion: routineId (and userId if you filter by owner); RLS or
+    API checks: every mutation must match session userId.
+
+[Ticket A6] Auth wiring
+  - Issue/obtain userId on sign-in; attach to all routine and completion writes;
+    reject unauthenticated requests.
+
+--- Epic B: Staleness engine ---
+
+[Ticket B1] Interval + constants module
+  - Implement I_hours, neutralStartRatio, overdue breakpoints as named constants
+    with short comment on tuning.
+  - Single function: inputs (lastCompletedAt | null, intervalDays, now) → one of
+    the 10 tokens.
+
+[Ticket B2] Unit tests for staleness
+  - Table-driven tests at bucket boundaries (just before/after each edge).
+  - unknown when lastCompletedAt null.
+  - Sub-day interval sanity (e.g. intervalDays = 0.5 if you allow fractional).
+
+[Ticket B3] Severity ordering
+  - Implement compare function or numeric rank 0–9 for tokens; document
+    behaviour for unknown vs overdue in group aggregation.
+
+--- Epic C: UI & design tokens ---
+
+[Ticket C1] Colour tokens → design palette
+  - Map 10 tokens to grey / 3 greens / 3 yellow-oranges / 3 reds (WCAG contrast
+    on group tiles and routine rows).
+
+[Ticket C2] Group grid layout
+  - Layout for 6–12 groups filling viewport without scroll; tap → routine list.
+  - Tiles use name (and icon); optional group description can live on a detail
+    sheet, tooltip, or onboarding — keep the grid itself compact.
+  - Order groups in the grid client-side (e.g. alphabetical by name, or by
+    aggregate staleness); no persisted sortOrder.
+
+[Ticket C3] Routine list + complete action
+  - Show routine title, description (if present), interval, derived colour/badge;
+    primary action records completion and refreshes lastCompletedAt-dependent
+    state.
+  - Routine create/edit UI: pick group from catalog only (picker / segmented list);
+    optional description field with same length cap as backend.
+  - Order routines in the list client-side (e.g. by staleness severity, then
+    title); no persisted sortOrder.
+
+--- Epic D: State, performance, polish ---
+
+[Ticket D1] Central clock / nowTick
+  - Single provider or hook: update now at bounded interval + on AppState
+    focus; pass into memoized selectors.
+
+[Ticket D2] Memoized selectors
+  - Derive routine token + group aggregate in memoized layer; avoid recomputing
+    full tree on unrelated state changes.
+
+[Ticket D3] Loading API
+  - One fetch for catalog groups with nested routines for current userId (including
+    lastCompletedAt); document shape for client.
+
+--- Epic E: Future / optional ---
+
+[Ticket E1] Notifications
+  - Compute next boundary times from lastCompletedAt + rules; schedule local or
+    push notifications without storing colour in DB.
+
+[Ticket E2] Multi-user / household (optional evolution)
+  - Introduce householdId (or workspace id) and membership; decide whether Routine
+    rows are per-household shared or still per-user with shared views. Keep
+    userId/completedByUserId for attribution; groups stay app-global catalog.
+
+[Ticket E3] Calendar-day mode (if ever needed)
+  - Separate branch: user timezone, local date boundaries vs instant-hours mode.
+
+[Ticket E4] Completion provenance (optional)
+  - If needed: store how a completion was created (e.g. tap, import) or link
+    undo events — not required for staleness; defer until a concrete feature
+    needs it.
+
+================================================================================
+END OF SPEC
+================================================================================
