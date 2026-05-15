@@ -177,15 +177,21 @@ ok.strong.
 --------------------------------------------------------------------------------
 Group related work under epics as needed. Order is suggestive.
 
+Ticket tags in this file track this repo only: [DONE] shipped as described,
+[PARTIAL] only partly covered, [TODO] not started here.
+
+Done in repo (Supabase): A1 (#13, routine_groups + RLS), A3 (#15, routines + RLS),
+A4 (#17, routine_completions + triggers + RLS). See supabase/migrations/.
+
 --- Epic A: Data model & persistence ---
 
-[Ticket A1] RoutineGroup catalog — schema
+[Ticket A1] [DONE] RoutineGroup catalog — schema
   - Add read-only catalog table (or equivalent) for RoutineGroup: id, name,
     optional description, optional iconKey (only if you use DB-driven icon keys).
   - RLS or equivalent: authenticated users SELECT only; no end-user INSERT/UPDATE/DELETE.
   - Routine.groupId (or FK) must reference this catalog.
 
-[Ticket A2] RoutineGroup catalog — seed data
+[Ticket A2] [TODO] RoutineGroup catalog — seed data
   - Add migration(s) with idempotent INSERTs (or upserts) for the fixed group set
     (id, name, optional description).
   - Document release process: adding/changing a group = new migration adjusting
@@ -193,7 +199,7 @@ Group related work under epics as needed. Order is suggestive.
   - Decide icon strategy: client-only map by group id vs optional iconKey values
     in seed data.
 
-[Ticket A3] Schema: Routine
+[Ticket A3] [DONE] Schema: Routine
   - Add Routine with userId (required, owner), groupId (must reference catalog id),
     title, description (optional), intervalDays, lastCompletedAt (nullable),
     archivedAt optional.
@@ -204,52 +210,57 @@ Group related work under epics as needed. Order is suggestive.
     policies allow). Allow DELETE if hard-delete is supported; else rely on
     archivedAt only and omit delete policy.
 
-[Ticket A4] Schema: RoutineCompletion + write path
+[Ticket A4] [DONE] Schema: RoutineCompletion + write path
   - Add RoutineCompletion log with userId (and optional completedByUserId); on
     insert, verify routine.userId matches; update Routine.lastCompletedAt to latest
     completedAt.
   - Define undo/delete policy if user removes mistaken completion.
 
-[Ticket A5] Migrations / Sanity types
+[Ticket A5] [PARTIAL] Migrations / Sanity types
   - Implement schema in chosen backend; indexes on Routine: userId, (userId, groupId);
     on RoutineCompletion: routineId (and userId if you filter by owner); RLS or
     API checks: every mutation must match session userId.
+  - Note: indexes + RLS for Routine and RoutineCompletion are in migrations;
+    remaining work here is any backend/doc pass you still want (e.g. generated
+    types, ADRs), or Sanity if you add a CMS later.
 
-[Ticket A6] Auth wiring
+[Ticket A6] [PARTIAL] Auth wiring
   - Issue/obtain userId on sign-in; attach to all routine and completion writes;
     reject unauthenticated requests.
+  - Note: Supabase Auth + browser client + RLS are in place; routine/completion
+    mutations are not yet implemented in the app UI/API layer—verify when you add them.
 
 --- Epic B: Staleness engine ---
 
-[Ticket B1] Interval + constants module
+[Ticket B1] [TODO] Interval + constants module
   - Implement I_hours, neutralStartRatio, overdue breakpoints as named constants
     with short comment on tuning.
   - Single function: inputs (lastCompletedAt | null, intervalDays, now) → one of
     the 10 tokens.
 
-[Ticket B2] Unit tests for staleness
+[Ticket B2] [TODO] Unit tests for staleness
   - Table-driven tests at bucket boundaries (just before/after each edge).
   - unknown when lastCompletedAt null.
   - Sub-day interval sanity (e.g. intervalDays = 0.5 if you allow fractional).
 
-[Ticket B3] Severity ordering
+[Ticket B3] [TODO] Severity ordering
   - Implement compare function or numeric rank 0–9 for tokens; document
     behaviour for unknown vs overdue in group aggregation.
 
 --- Epic C: UI & design tokens ---
 
-[Ticket C1] Colour tokens → design palette
+[Ticket C1] [TODO] Colour tokens → design palette
   - Map 10 tokens to grey / 3 greens / 3 yellow-oranges / 3 reds (WCAG contrast
     on group tiles and routine rows).
 
-[Ticket C2] Group grid layout
+[Ticket C2] [TODO] Group grid layout
   - Layout for 6–12 groups filling viewport without scroll; tap → routine list.
   - Tiles use name (and icon); optional group description can live on a detail
     sheet, tooltip, or onboarding — keep the grid itself compact.
   - Order groups in the grid client-side (e.g. alphabetical by name, or by
     aggregate staleness); no persisted sortOrder.
 
-[Ticket C3] Routine list + complete action
+[Ticket C3] [TODO] Routine list + complete action
   - Show routine title, description (if present), interval, derived colour/badge;
     primary action records completion and refreshes lastCompletedAt-dependent
     state.
@@ -260,33 +271,33 @@ Group related work under epics as needed. Order is suggestive.
 
 --- Epic D: State, performance, polish ---
 
-[Ticket D1] Central clock / nowTick
+[Ticket D1] [TODO] Central clock / nowTick
   - Single provider or hook: update now at bounded interval + on AppState
     focus; pass into memoized selectors.
 
-[Ticket D2] Memoized selectors
+[Ticket D2] [TODO] Memoized selectors
   - Derive routine token + group aggregate in memoized layer; avoid recomputing
     full tree on unrelated state changes.
 
-[Ticket D3] Loading API
+[Ticket D3] [TODO] Loading API
   - One fetch for catalog groups with nested routines for current userId (including
     lastCompletedAt); document shape for client.
 
 --- Epic E: Future / optional ---
 
-[Ticket E1] Notifications
+[Ticket E1] [TODO] Notifications
   - Compute next boundary times from lastCompletedAt + rules; schedule local or
     push notifications without storing colour in DB.
 
-[Ticket E2] Multi-user / household (optional evolution)
+[Ticket E2] [TODO] Multi-user / household (optional evolution)
   - Introduce householdId (or workspace id) and membership; decide whether Routine
     rows are per-household shared or still per-user with shared views. Keep
     userId/completedByUserId for attribution; groups stay app-global catalog.
 
-[Ticket E3] Calendar-day mode (if ever needed)
+[Ticket E3] [TODO] Calendar-day mode (if ever needed)
   - Separate branch: user timezone, local date boundaries vs instant-hours mode.
 
-[Ticket E4] Completion provenance (optional)
+[Ticket E4] [TODO] Completion provenance (optional)
   - If needed: store how a completion was created (e.g. tap, import) or link
     undo events — not required for staleness; defer until a concrete feature
     needs it.
