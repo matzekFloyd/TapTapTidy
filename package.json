@@ -14,7 +14,13 @@
 		"test": "npm run test:unit -- --run",
 		"supabase:start": "supabase start",
 		"supabase:stop": "supabase stop",
-		"supabase:status": "supabase status"
+		"supabase:status": "supabase status",
+		"supabase:db:reset": "supabase db reset",
+		"supabase:remote:login": "supabase login",
+		"supabase:remote:link": "supabase link",
+		"supabase:remote:migrations": "supabase migration list",
+		"supabase:remote:push:cli": "supabase db push",
+		"supabase:remote:push": "node scripts/supabase-remote-push.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",
