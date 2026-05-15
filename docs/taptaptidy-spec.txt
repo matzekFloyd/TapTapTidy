@@ -199,6 +199,10 @@ Group related work under epics as needed. Order is suggestive.
     archivedAt optional.
   - Validate groupId against known catalog on create/update (reject unknown ids).
   - Index or query pattern: list by (userId), and by (userId, groupId).
+  - Enable RLS; policies so authenticated users only SELECT/INSERT/UPDATE/DELETE
+    rows where userId = auth.uid(); tighten grants (revoke all, grant only what
+    policies allow). Allow DELETE if hard-delete is supported; else rely on
+    archivedAt only and omit delete policy.
 
 [Ticket A4] Schema: RoutineCompletion + write path
   - Add RoutineCompletion log with userId (and optional completedByUserId); on
