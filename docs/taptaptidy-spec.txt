@@ -179,9 +179,10 @@ Ticket tags in this file track this repo only: [DONE] shipped as described,
 [PARTIAL] only partly covered, [TODO] not started here.
 
 Done in repo (Supabase): A1 (#13, routine_groups + RLS), A2 (routine_groups seed),
-A3 (#15, routines + RLS), A4 (#17, routine_completions + triggers + RLS).
+A3 (#15, routines + RLS), A4 (#17, routine_completions + triggers + RLS),
+A5 (generated Database types, typed client, README schema contract).
 App: @lucide/svelte icon whitelist in src/lib/routine-group-icons.ts. See
-supabase/migrations/.
+supabase/migrations/ and npm run supabase:types.
 
 --- Epic A: Data model & persistence ---
 
@@ -246,13 +247,12 @@ supabase/migrations/.
     completedAt.
   - Define undo/delete policy if user removes mistaken completion.
 
-[Ticket A5] [PARTIAL] Migrations / Sanity types
-  - Implement schema in chosen backend; indexes on Routine: userId, (userId, groupId);
-    on RoutineCompletion: routineId (and userId if you filter by owner); RLS or
-    API checks: every mutation must match session userId.
-  - Note: indexes + RLS for Routine and RoutineCompletion are in migrations;
-    remaining work here is any backend/doc pass you still want (e.g. generated
-    types, ADRs), or Sanity if you add a CMS later.
+[Ticket A5] [DONE] Migrations / Sanity types
+  - Schema in Supabase (migrations); indexes and RLS shipped in A1–A4.
+  - npm run supabase:types → src/lib/database.types.ts; createBrowserClient<Database>.
+  - README: migrations vs seed.sql, PostgREST snake_case contract, RLS note,
+    completion index rationale (no user_id on routine_completions unless needed).
+  - Sanity CMS: out of scope unless product moves content off Postgres.
 
 [Ticket A6] [PARTIAL] Auth wiring
   - Issue/obtain userId on sign-in; attach to all routine and completion writes;
