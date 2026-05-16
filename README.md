@@ -120,7 +120,7 @@ Point the **app** at hosted data with `PUBLIC_SUPABASE_*` from **Project Setting
 | `npm run dev` | Dev server ([Vite](https://vitejs.dev/)) |
 | `npm run build` | Production static build → `build/` |
 | `npm run preview` | Serve the production build locally |
-| `npm test` | Run unit tests (Vitest, once) |
+| `npm test` | Run unit tests ([Vitest](https://vitest.dev/), once; uses placeholder `PUBLIC_SUPABASE_*` from `vite.config.ts`) |
 | `npm run test:unit` | Vitest in watch mode |
 | `npm run check` | Type-check Svelte/TS ([svelte-check](https://github.com/sveltejs/svelte-check)) |
 | `npm run supabase:start` | Start local Supabase (Docker) |

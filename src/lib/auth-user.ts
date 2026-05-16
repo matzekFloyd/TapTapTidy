@@ -1,11 +1,7 @@
 import { authState } from '$lib/auth.svelte';
+import { AuthRequiredError } from '$lib/auth-errors';
 
-export class AuthRequiredError extends Error {
-	constructor(message = 'You must be signed in to continue.') {
-		super(message);
-		this.name = 'AuthRequiredError';
-	}
-}
+export { AuthRequiredError };
 
 export function getSessionUserId(): string | null {
 	return authState.session?.user.id ?? null;
