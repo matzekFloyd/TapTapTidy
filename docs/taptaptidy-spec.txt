@@ -41,7 +41,7 @@ field names to match your actual stack (Sanity, SQL, etc.).
   - description (string, optional) — longer copy, tooltips, or first-run help;
     empty if unused. Cap length in seed migration / API (same order of magnitude
     as routines).
-  - icon_key (string, optional) — Lucide icon name for lucide-svelte (e.g.
+  - icon_key (string, optional) — Lucide icon name for @lucide/svelte (e.g.
     layout-grid, sparkles). Seeded via migrations; app maps key → component from a
     fixed whitelist (do not load arbitrary icon names from user input).
   - Storage: read-only rows in the database, inserted and updated only via
@@ -178,24 +178,26 @@ Group related work under epics as needed. Order is suggestive.
 Ticket tags in this file track this repo only: [DONE] shipped as described,
 [PARTIAL] only partly covered, [TODO] not started here.
 
-Done in repo (Supabase): A1 (#13, routine_groups + RLS), A3 (#15, routines + RLS),
-A4 (#17, routine_completions + triggers + RLS). See supabase/migrations/.
+Done in repo (Supabase): A1 (#13, routine_groups + RLS), A2 (routine_groups seed),
+A3 (#15, routines + RLS), A4 (#17, routine_completions + triggers + RLS).
+App: @lucide/svelte icon whitelist in src/lib/routine-group-icons.ts. See
+supabase/migrations/.
 
 --- Epic A: Data model & persistence ---
 
 [Ticket A1] [DONE] RoutineGroup catalog — schema
   - Add read-only catalog table (or equivalent) for RoutineGroup: id, name,
-    optional description, icon_key (Lucide name for lucide-svelte).
+    optional description, icon_key (Lucide name for @lucide/svelte).
   - RLS or equivalent: authenticated users SELECT only; no end-user INSERT/UPDATE/DELETE.
   - Routine.groupId (or FK) must reference this catalog.
 
-[Ticket A2] [TODO] RoutineGroup catalog — seed data
+[Ticket A2] [DONE] RoutineGroup catalog — seed data
   - Add migration(s) with idempotent INSERTs (or upserts) for the fixed group set
     (id, name, optional description, icon_key).
   - Document release process: adding/changing a group = new migration adjusting
     seed rows (id, name, description, icon_key). App keeps a whitelist mapping
-    icon_key → lucide-svelte component; add new Lucide imports when seed adds keys.
-  - Icons: lucide-svelte (ISC, commercial use OK). Store the chosen Lucide icon
+    icon_key → @lucide/svelte component; add new Lucide imports when seed adds keys.
+  - Icons: @lucide/svelte (ISC, commercial use OK). Store the chosen Lucide icon
     name in icon_key per row (kebab-case, matches Lucide export names).
 
   Canonical catalog v1 (six groups; default home grid order is this id sequence,
@@ -216,7 +218,7 @@ A4 (#17, routine_completions + triggers + RLS). See supabase/migrations/.
     - social: Recurring people time, family/kids/pets, social upkeep.
     - other:  Car, gear, seasonal, anything that does not fit above.
 
-  Lucide icon candidates (lucide-svelte) per group — alternatives if you change
+  Lucide icon candidates (@lucide/svelte) per group — alternatives if you change
   icon_key in a later migration:
 
     Group   | Suggestions

@@ -22,7 +22,7 @@ comment on table public.routine_groups is
 comment on column public.routine_groups.id is
   'Stable slug or uuid matching product catalog.';
 comment on column public.routine_groups.icon_key is
-  'Lucide icon name (kebab-case) for lucide-svelte; seeded via migrations.';
+  'Lucide icon name (kebab-case) for @lucide/svelte; seeded via migrations.';
 
 alter table public.routine_groups enable row level security;
 
