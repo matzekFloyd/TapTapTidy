@@ -55,14 +55,36 @@ Copy `.env.example` → `.env` and set the key from `supabase status`. **Do not 
 
 Ports are configured in [`supabase/config.toml`](supabase/config.toml) (API `54331`, DB `54332`, Studio `54333`). If `supabase start` reports a port conflict, change those values or stop the other stack using the same ports.
 
-Schema and migrations live in [`supabase/migrations/`](supabase/migrations/).
+Schema and migrations live in [`supabase/migrations/`](supabase/migrations/). TypeScript types for the `public` schema are generated into [`src/lib/database.types.ts`](src/lib/database.types.ts).
 
-### Database migrations
+### Database migrations vs `seed.sql`
 
-- Add new files under [`supabase/migrations/`](supabase/migrations/) using the CLI (`supabase migration new <name>`) or matching the timestamped naming convention.
-- **`supabase db reset`** tears down local Postgres and reapplies migrations (and [`supabase/seed.sql`](supabase/seed.sql) if `[db.seed]` is enabled). Use this after editing SQL so local state matches the repo.
-- With the stack stopped, you can also run **`supabase start`**; migrations apply on first boot. After changes, **`supabase db reset`** is the usual way to confirm everything applies cleanly.
-- Row Level Security and policies on **domain tables** arrive with later schema tickets; this repo’s first migration intentionally avoids `public` app tables until that design is finalized.
+| Mechanism | Purpose |
+|-----------|---------|
+| **[`supabase/migrations/`](supabase/migrations/)** | **Schema + product data** that must exist everywhere (tables, RLS, catalog rows such as `routine_groups`). Versioned; applied on `db reset` and `db push`. |
+| **[`supabase/seed.sql`](supabase/seed.sql)** | **Optional dev-only rows** run *after* migrations on `supabase db reset` (demo users, sample routines). Not for production catalog data. Currently a no-op placeholder. |
+
+- Add new migration files with the CLI (`supabase migration new <name>`) or the existing timestamped naming convention.
+- **`npm run supabase:db:reset`** (or `supabase db reset`) recreates local Postgres, reapplies all migrations, then runs `seed.sql`. Use this after editing SQL so local state matches the repo.
+- **`npm run supabase:types`** regenerates [`src/lib/database.types.ts`](src/lib/database.types.ts) from the **local** database (Supabase must be running). Use after schema changes.
+
+### Schema contract (PostgREST / client)
+
+The app uses the **anon** key and **Row Level Security** — never put `service_role` in `PUBLIC_*` env vars.
+
+| Spec / TS (concept) | Database column (`public.*`) |
+|---------------------|------------------------------|
+| `userId` | `user_id` → `auth.users` |
+| `groupId` | `group_id` → `routine_groups.id` |
+| `intervalDays` | `interval_days` |
+| `lastCompletedAt` | `last_completed_at` — **maintained by trigger** on `routine_completions` insert/delete; do not treat as the only source of truth for history |
+| `iconKey` | `icon_key` (Lucide name for `@lucide/svelte`) |
+
+**Tables:** `routine_groups` (read-only catalog for users), `routines` (per-user), `routine_completions` (append-only log).
+
+**Indexes:** `routines (user_id)`, `routines (user_id, group_id)`; `routine_completions (routine_id)`, `routine_completions (routine_id, completed_at desc)`. Owner-scoped completion listing goes through `routines` + `routine_id` — no separate `user_id` index on `routine_completions` unless query patterns change.
+
+Typed access: [`src/lib/supabase.ts`](src/lib/supabase.ts) (`createBrowserClient<Database>`), helpers such as [`src/lib/routine-groups-db.ts`](src/lib/routine-groups-db.ts).
 
 Local **Auth** (Studio → Authentication → URL configuration): keep **Site URL** aligned with where you load the SPA (for example `http://127.0.0.1:5173` for Vite, or `http://localhost:5173`). Add the same origins under **Redirect URLs** if you use magic links or OAuth later. Confirm whether **Confirm email** is required for testing; Mailpit/Inbucket shows signup mail when email confirmation is enabled locally.
 
@@ -85,7 +107,7 @@ npm run supabase:remote:link -- --project-ref <REFERENCE_ID>
 npm run supabase:remote:push
 ```
 
-That runs [`scripts/supabase-remote-push.mjs`](scripts/supabase-remote-push.mjs): prints migration status, asks for confirmation, then runs `supabase db push` against the linked project.
+That runs [`scripts/supabase-remote-push.mjs`](scripts/supabase-remote-push.mjs): prints migration status, exits without `db push` when local and remote already match, otherwise asks for confirmation and runs `supabase db push`.
 
 Direct CLI equivalents: `npm run supabase:remote:migrations`, `npm run supabase:remote:push:cli`.
 
@@ -105,10 +127,11 @@ Point the **app** at hosted data with `PUBLIC_SUPABASE_*` from **Project Setting
 | `npm run supabase:stop` | Stop local Supabase |
 | `npm run supabase:status` | Show local URLs and keys |
 | `npm run supabase:db:reset` | Recreate local DB and reapply migrations |
+| `npm run supabase:types` | Regenerate `src/lib/database.types.ts` from local DB |
 | `npm run supabase:remote:login` | Supabase CLI login (hosted projects) |
 | `npm run supabase:remote:link` | Link CLI to a hosted project (`--project-ref`) |
 | `npm run supabase:remote:migrations` | List local vs linked remote migration status |
-| `npm run supabase:remote:push` | Confirm, then push pending migrations (see Hosted Supabase above) |
+| `npm run supabase:remote:push` | List migrations; skip push if remote is up to date, else confirm and `db push` |
 | `npm run supabase:remote:push:cli` | Run `supabase db push` without the confirmation script |
 
 ## Styling

@@ -16,6 +16,7 @@
 		"supabase:stop": "supabase stop",
 		"supabase:status": "supabase status",
 		"supabase:db:reset": "supabase db reset",
+		"supabase:types": "node scripts/generate-supabase-types.mjs",
 		"supabase:remote:login": "supabase login",
 		"supabase:remote:link": "supabase link",
 		"supabase:remote:migrations": "supabase migration list",
