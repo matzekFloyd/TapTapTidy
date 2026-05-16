@@ -180,7 +180,8 @@ Ticket tags in this file track this repo only: [DONE] shipped as described,
 
 Done in repo (Supabase): A1 (#13, routine_groups + RLS), A2 (routine_groups seed),
 A3 (#15, routines + RLS), A4 (#17, routine_completions + triggers + RLS),
-A5 (generated Database types, typed client, README schema contract).
+A5 (generated Database types, typed client, README schema contract),
+A6 (auth-user helpers, routines/completions DB layer, session-ended UX).
 App: @lucide/svelte icon whitelist in src/lib/routine-group-icons.ts. See
 supabase/migrations/ and npm run supabase:types.
 
@@ -254,11 +255,15 @@ supabase/migrations/ and npm run supabase:types.
     completion index rationale (no user_id on routine_completions unless needed).
   - Sanity CMS: out of scope unless product moves content off Postgres.
 
-[Ticket A6] [PARTIAL] Auth wiring
-  - Issue/obtain userId on sign-in; attach to all routine and completion writes;
-    reject unauthenticated requests.
-  - Note: Supabase Auth + browser client + RLS are in place; routine/completion
-    mutations are not yet implemented in the app UI/API layer—verify when you add them.
+[Ticket A6] [DONE] Auth wiring
+  - requireUserId() / getSessionUserId() in src/lib/auth-user.ts; never set user_id
+    from form input.
+  - src/lib/routines-db.ts — list/get/create/update/archive/delete (no client
+    last_completed_at on write).
+  - src/lib/routine-completions-db.ts — recordRoutineCompletion, undoLatestRoutineCompletion.
+  - listRoutineGroupsCatalog requires session; getSupabaseErrorMessage for RLS/JWT.
+  - Session ended → message on login + redirect (auth.svelte.ts). UI screens use
+    these helpers in C3/D3 tickets.
 
 --- Epic B: Staleness engine ---
 
