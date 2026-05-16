@@ -13,6 +13,10 @@ vi.mock('./supabase', () => ({
 	}
 }));
 
+vi.mock('./auth-user', () => ({
+	requireUserId: () => '00000000-0000-4000-8000-000000000001'
+}));
+
 describe('listRoutineGroupsCatalog', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();

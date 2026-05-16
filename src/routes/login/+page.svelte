@@ -10,6 +10,13 @@
 	let submitting = $state(false);
 
 	$effect(() => {
+		if (authState.sessionEndedMessage) {
+			errorMessage = authState.sessionEndedMessage;
+			authState.sessionEndedMessage = null;
+		}
+	});
+
+	$effect(() => {
 		if (!authState.initializing && authState.session) {
 			void goto('/');
 		}

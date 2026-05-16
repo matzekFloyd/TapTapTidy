@@ -1,3 +1,4 @@
+import { requireUserId } from '$lib/auth-user';
 import type { Tables } from './database.types';
 import { supabase } from './supabase';
 
@@ -8,6 +9,8 @@ export type RoutineGroupRow = Tables<'routine_groups'>;
  * Sort in the UI with ROUTINE_GROUP_GRID_ORDER — PostgREST order is not guaranteed.
  */
 export async function listRoutineGroupsCatalog(): Promise<RoutineGroupRow[]> {
+	requireUserId();
+
 	const { data, error } = await supabase.from('routine_groups').select('*');
 
 	if (error) {
