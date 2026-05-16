@@ -35,17 +35,15 @@ field names to match your actual stack (Sanity, SQL, etc.).
     read or mutate another’s rows.
 
 2.1 RoutineGroup (catalog — not user-created)
-  - Stable id (string): prefer a slug/key (e.g. "body", "space", "other") so the
+  - Stable id (string): prefer a slug/key (e.g. "tidy", "clean", "other") so the
     client and server agree even if copy changes; uuid also fine if immutable.
   - name (string) — display label
   - description (string, optional) — longer copy, tooltips, or first-run help;
     empty if unused. Cap length in seed migration / API (same order of magnitude
     as routines).
-  - Icons: not required in the DB for v1. Prefer a static map in the app
-    RoutineGroup.id → icon component or asset (everything bundled with the client).
-    Optional: add an iconKey column to the catalog only if you want migrations to
-    switch among a fixed set of keys already shipped in the app (still no
-    arbitrary remote images unless you add that product).
+  - icon_key (string, optional) — Lucide icon name for lucide-svelte (e.g.
+    layout-grid, sparkles). Seeded via migrations; app maps key → component from a
+    fixed whitelist (do not load arbitrary icon names from user input).
   - Storage: read-only rows in the database, inserted and updated only via
     migrations (and/or a trusted admin path — never exposed as “create group”
     in the user UI). App and RLS should block end-user INSERT/UPDATE/DELETE on
@@ -187,17 +185,47 @@ A4 (#17, routine_completions + triggers + RLS). See supabase/migrations/.
 
 [Ticket A1] [DONE] RoutineGroup catalog — schema
   - Add read-only catalog table (or equivalent) for RoutineGroup: id, name,
-    optional description, optional iconKey (only if you use DB-driven icon keys).
+    optional description, icon_key (Lucide name for lucide-svelte).
   - RLS or equivalent: authenticated users SELECT only; no end-user INSERT/UPDATE/DELETE.
   - Routine.groupId (or FK) must reference this catalog.
 
 [Ticket A2] [TODO] RoutineGroup catalog — seed data
   - Add migration(s) with idempotent INSERTs (or upserts) for the fixed group set
-    (id, name, optional description).
+    (id, name, optional description, icon_key).
   - Document release process: adding/changing a group = new migration adjusting
-    seed rows (and app icon map if ids change).
-  - Decide icon strategy: client-only map by group id vs optional iconKey values
-    in seed data.
+    seed rows (id, name, description, icon_key). App keeps a whitelist mapping
+    icon_key → lucide-svelte component; add new Lucide imports when seed adds keys.
+  - Icons: lucide-svelte (ISC, commercial use OK). Store the chosen Lucide icon
+    name in icon_key per row (kebab-case, matches Lucide export names).
+
+  Canonical catalog v1 (six groups; default home grid order is this id sequence,
+  not alphabetical — implement in client config or ordered fetch):
+
+    1. tidy   — Tidy   — icon_key: layout-grid
+    2. clean  — Clean  — icon_key: sparkles
+    3. admin  — Admin  — icon_key: clipboard-list
+    4. health — Health — icon_key: heart-pulse
+    5. social — Social — icon_key: users
+    6. other  — Other  — icon_key: shapes
+
+    Descriptions (optional in seed):
+    - tidy:   Put things away, reset surfaces, quick home order.
+    - clean:  Vacuum, mop, bathroom, sheets, deeper cleaning.
+    - admin:  Bills, budget, taxes, subscriptions, life paperwork.
+    - health: Gym, sport, movement, sleep, recovery, check-ins.
+    - social: Recurring people time, family/kids/pets, social upkeep.
+    - other:  Car, gear, seasonal, anything that does not fit above.
+
+  Lucide icon candidates (lucide-svelte) per group — alternatives if you change
+  icon_key in a later migration:
+
+    Group   | Suggestions
+    tidy    | layout-grid, archive, package
+    clean   | sparkles, brush, droplets
+    admin   | clipboard-list, file-text, receipt
+    health  | heart-pulse, dumbbell, activity
+    social  | users, user-round, hand-heart
+    other   | ellipsis, shapes, circle-dashed
 
 [Ticket A3] [DONE] Schema: Routine
   - Add Routine with userId (required, owner), groupId (must reference catalog id),
