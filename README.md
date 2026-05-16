@@ -1,6 +1,6 @@
 # 📋 TapTapTidy
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Unit tests](https://github.com/matzekFloyd/TapTapTidy/actions/workflows/unit-tests.yml/badge.svg?branch=master)](https://github.com/matzekFloyd/TapTapTidy/actions/workflows/unit-tests.yml)
 
 Chore-tracking app (work in progress).
 
