@@ -1,6 +1,6 @@
-import { requireUserId } from '$lib/auth-user';
-import type { Tables, TablesInsert, TablesUpdate } from '$lib/database.types';
-import { supabase } from '$lib/supabase';
+import { requireUserId } from '#lib/auth-user.ts';
+import type { Tables, TablesInsert, TablesUpdate } from '#lib/database.types.ts';
+import { supabase } from '#lib/supabase.ts';
 
 export type RoutineRow = Tables<'routines'>;
 

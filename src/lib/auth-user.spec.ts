@@ -5,7 +5,7 @@ const mockAuthState = vi.hoisted(() => ({
 	session: null as { user: { id: string } } | null
 }));
 
-vi.mock('$lib/auth.svelte', () => ({
+vi.mock('#lib/auth.svelte.ts', () => ({
 	authState: mockAuthState
 }));
 

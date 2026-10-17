@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { APP_NAME } from '$lib/app';
-	import { authState, signOut } from '$lib/auth.svelte';
+	import { APP_NAME } from '#lib/app.ts';
+	import { authState, signOut } from '#lib/auth.svelte.ts';
 
 	let signingOut = $state(false);
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import { authState } from '$lib/auth.svelte';
+	import { browser } from '$app/env';
+	import { authState } from '#lib/auth.svelte.ts';
 
 	let { children } = $props();
 
