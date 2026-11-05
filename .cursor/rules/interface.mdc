@@ -8,7 +8,7 @@ alwaysApply: true
 Before adding or changing screens, routes, copy, or chore interactions, follow:
 
 - [DESIGN.md](../../DESIGN.md) — doing grid and Setup
-- [BRAND.md](../../BRAND.md) — color, Familjen Grotesk, voice
+- [BRAND.md](../../BRAND.md) — color and voice; the type family is not chosen yet
 - [ACCESSIBILITY.md](../../ACCESSIBILITY.md) — keyboard, screen reader, visible Due and Overdue
 
 Land brand tokens in `src/styles/_variables.scss`. Do not invent a parallel palette or a third view. Where a visual choice and ACCESSIBILITY.md disagree, ACCESSIBILITY.md wins. The desktop web app has to work with a keyboard alone and with Narrator or NVDA. Android and iOS, later, have to expose the same names and actions.

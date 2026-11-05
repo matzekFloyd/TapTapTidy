@@ -34,7 +34,7 @@ The gap between doing tiles is grout, a structural line. Tiles are not floating 
 
 ## Type
 
-One family: **Familjen Grotesk**. It is a plain grotesque with a slightly squared, domestic stiffness, which suits a short label on a tile. Do not add a display face, a monospace face, or italics that highlight a single word.
+The family is not chosen. Use the system sans already in `src/styles/_variables.scss` until it is. Do not introduce a grotesque as a stand-in, and do not add a display face, a monospace face, or italics that highlight a single word.
 
 | role | weight | size | notes |
 |------|--------|------|-------|
@@ -42,7 +42,7 @@ One family: **Familjen Grotesk**. It is a plain grotesque with a slightly square
 | Setup body | 400 | 1rem | line-height 1.5, line length under 65 characters |
 | Chore name on the edit panel | 600 | about 2rem | the one large line on that screen |
 
-Fallback, only if the file fails to load: `system-ui, sans-serif`. Self-host the font when the UI is built. Sentence case for everything except the product name.
+Sentence case for everything except the product name. When a family is chosen, self-host one family and keep these roles.
 
 ## Marks
 
