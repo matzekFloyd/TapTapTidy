@@ -1,5 +1,30 @@
 @use 'variables' as *;
 
+// Zilla Slab, self-hosted. SIL Open Font License: ./fonts/OFL.txt
+@font-face {
+	font-family: 'Zilla Slab';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./fonts/zilla-slab-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Zilla Slab';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('./fonts/zilla-slab-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Zilla Slab';
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url('./fonts/zilla-slab-latin-600-normal.woff2') format('woff2');
+}
+
 *,
 *::before,
 *::after {
@@ -7,10 +32,14 @@
 }
 
 :root {
-	--font-family-sans: #{$font-family-sans};
-	--font-size-base: #{$font-size-base};
-	--font-size-lg: #{$font-size-lg};
-	--line-height-base: #{$line-height-base};
+	--font-family: #{$font-family};
+	--font-weight-body: #{$font-weight-body};
+	--font-size-body: #{$font-size-body};
+	--line-height-body: #{$line-height-body};
+	--font-weight-tile: #{$font-weight-tile};
+	--font-size-tile: #{$font-size-tile};
+	--font-weight-chore: #{$font-weight-chore};
+	--font-size-chore: #{$font-size-chore};
 
 	--space-xs: #{$space-xs};
 	--space-sm: #{$space-sm};
@@ -18,15 +47,11 @@
 	--space-lg: #{$space-lg};
 	--space-xl: #{$space-xl};
 
-	--color-bg: #{$color-bg};
-	--color-surface: #{$color-surface};
-	--color-text: #{$color-text};
-	--color-text-muted: #{$color-text-muted};
-	--color-accent: #{$color-accent};
-	--color-border: #{$color-border};
-
-	--radius-sm: #{$radius-sm};
-	--radius-md: #{$radius-md};
+	--color-wall: #{$color-wall};
+	--color-tile: #{$color-tile};
+	--color-grout: #{$color-grout};
+	--color-ink: #{$color-ink};
+	--color-chili: #{$color-chili};
 
 	color-scheme: light;
 }
@@ -34,9 +59,24 @@
 body {
 	margin: 0;
 	min-height: 100dvh;
-	font-family: var(--font-family-sans);
-	font-size: var(--font-size-base);
-	line-height: var(--line-height-base);
-	color: var(--color-text);
-	background-color: var(--color-bg);
+	font-family: var(--font-family);
+	font-size: var(--font-size-body);
+	font-weight: var(--font-weight-body);
+	font-synthesis: none;
+	line-height: var(--line-height-body);
+	color: var(--color-ink);
+	background-color: var(--color-wall);
+}
+
+button,
+input,
+textarea,
+select {
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+
+a {
+	color: var(--color-ink);
 }

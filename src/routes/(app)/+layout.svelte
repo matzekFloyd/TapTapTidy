@@ -23,7 +23,8 @@
 	.auth-status {
 		margin: var(--space-xl) var(--space-md);
 		text-align: center;
-		color: var(--color-text-muted);
-		font-size: var(--font-size-base);
+		color: var(--color-ink);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 </style>
