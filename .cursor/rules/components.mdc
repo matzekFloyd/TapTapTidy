@@ -1,0 +1,21 @@
+---
+description: Reuse one component across screens; differences are props, not copies
+alwaysApply: true
+---
+
+# Shared components
+
+A control that appears on more than one screen is one component. Screens pass props. They do not get their own copy with a new name.
+
+`Button` lives at `src/lib/Button.svelte`. Sign in, register, Back, Setup, and Add a chore all use it. Do not add `SubmitButton`, `SignInButton`, `StripButton`, or a raw `<button>` restyled in the page.
+
+```svelte
+<Button type="submit" disabled={submitting}>Sign in</Button>
+<Button emphasis="quiet" onclick={() => goto('/setup')}>Setup</Button>
+```
+
+A difference in label, emphasis, `type`, or disabled state is a prop on `Button`. A new screen that needs a new look adds a prop. It does not add a file.
+
+The same rule applies to any other repeated control. Two components that differ only by their text are one component.
+
+A grid tile is not a `Button` variant. Group tiles and routine tiles are their own components because they are the tiled surface, not a labeled action. Those tile components are still shared by Doing and Setup, with props for the label and the settled / due / overdue state.

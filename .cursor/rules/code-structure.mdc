@@ -1,0 +1,29 @@
+---
+description: Keep source files under 400 lines by splitting along real responsibilities
+alwaysApply: true
+---
+
+# Code structure
+
+When a source file you are creating or editing would pass 400 lines, stop and split it before finishing. Count every line. 400 is still fine. 401 is over.
+
+Split along a responsibility the file already has. Leave each new file with a name that says what it owns. Do not cut a file into `part-1` / `part-2`, and do not extract a handful of lines just to get under the number.
+
+Use the seams this repo already uses:
+
+- Pure rules and mappings go in `src/lib/*.ts`, with the colocated spec required by the tests rule.
+- Supabase reads and writes stay in `*-db.ts`.
+- A route page composes the view. A chunk of UI that only that route uses lives next to the route. UI shared by more than one route lives in `src/lib/`.
+
+```svelte
+<!-- Too big: one +page.svelte fetches, decides due state, and renders the grid -->
+
+<!-- Split -->
+<!-- src/lib/routine-due.ts          pure settled / due / overdue -->
+<!-- src/routes/(app)/GroupTile.svelte -->
+<!-- src/routes/(app)/+page.svelte   composes them -->
+```
+
+Do not hand-split generated output. `src/lib/database.types.ts` comes from `npm run supabase:types`. Regenerate it instead of editing it to satisfy the limit.
+
+If a change would push an existing file over 400, include the split in that change. Do not leave the over-long file for a follow-up.

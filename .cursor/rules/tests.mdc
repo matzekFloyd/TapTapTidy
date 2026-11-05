@@ -1,0 +1,19 @@
+---
+description: Each module and component has a colocated Vitest spec that runs
+alwaysApply: true
+---
+
+# Tests
+
+A file that owns behavior ships with a spec beside it, in the same change. `npm test` must pass.
+
+| file | spec |
+|------|------|
+| `src/lib/routine-due.ts` | `src/lib/routine-due.spec.ts` |
+| `src/lib/Button.svelte` | `src/lib/Button.svelte.spec.ts` |
+
+Use Vitest (`describe`, `it`, `expect`), as in `src/lib/routines-db.spec.ts`. Test the behavior the file owns. A due-rule spec passes an explicit now and timezone and asserts settled, due, and overdue. A component spec asserts what a person can do: the visible label, disabled, and that the action runs. Do not snapshot the whole page.
+
+`vite.config.ts` runs `src/**/*.{test,spec}.{js,ts}` in node and excludes `*.svelte.spec.ts`. A component spec must run in a Vitest project that can render Svelte. Add that project in the same change as the first component spec. A spec that the runner skips does not count.
+
+Do not add a spec for generated `src/lib/database.types.ts`, a type-only file, or a file that only re-exports. When you change behavior, update the accompanying spec in the same change.
