@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { APP_NAME } from '#lib/app.ts';
-	import { authState } from '#lib/auth.svelte.ts';
-	import { supabase } from '#lib/supabase.ts';
+	import { APP_NAME } from '#lib/app.js';
+	import { authState } from '#lib/auth.svelte.js';
+	import { supabase } from '#lib/supabase.js';
 
 	let email = $state('');
 	let password = $state('');

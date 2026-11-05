@@ -1,6 +1,6 @@
 import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { supabase } from '#lib/supabase.ts';
+import { supabase } from '#lib/supabase.js';
 import type { Session } from '@supabase/supabase-js';
 
 export const authState = $state({

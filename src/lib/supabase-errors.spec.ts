@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AuthRequiredError } from '#lib/auth-errors.ts';
+import { AuthRequiredError } from '#lib/auth-errors.js';
 import { getSupabaseErrorMessage } from './supabase-errors';
 
 describe('getSupabaseErrorMessage', () => {

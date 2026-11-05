@@ -1,4 +1,4 @@
-import { requireUserId } from '#lib/auth-user.ts';
+import { requireUserId } from '#lib/auth-user.js';
 import type { Tables } from './database.types';
 import { supabase } from './supabase';
 

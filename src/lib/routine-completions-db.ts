@@ -1,6 +1,6 @@
-import { requireUserId } from '#lib/auth-user.ts';
-import type { Tables, TablesInsert } from '#lib/database.types.ts';
-import { supabase } from '#lib/supabase.ts';
+import { requireUserId } from '#lib/auth-user.js';
+import type { Tables, TablesInsert } from '#lib/database.types.js';
+import { supabase } from '#lib/supabase.js';
 
 export type RoutineCompletionRow = Tables<'routine_completions'>;
 

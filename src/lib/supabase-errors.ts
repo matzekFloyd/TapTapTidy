@@ -1,5 +1,5 @@
 import type { PostgrestError } from '@supabase/supabase-js';
-import { AuthRequiredError } from '#lib/auth-errors.ts';
+import { AuthRequiredError } from '#lib/auth-errors.js';
 
 function isPostgrestError(error: unknown): error is PostgrestError {
 	return (

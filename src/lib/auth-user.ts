@@ -1,5 +1,5 @@
-import { authState } from '#lib/auth.svelte.ts';
-import { AuthRequiredError } from '#lib/auth-errors.ts';
+import { authState } from '#lib/auth.svelte.js';
+import { AuthRequiredError } from '#lib/auth-errors.js';
 
 export { AuthRequiredError };
 
