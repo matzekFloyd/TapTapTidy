@@ -140,7 +140,7 @@ Styles use **SCSS** with [`@use`](https://sass-lang.com/documentation/at-rules/u
 
 | Path | Purpose |
 |------|---------|
-| [`src/styles/_variables.scss`](src/styles/_variables.scss) | Design tokens (spacing, colors, typography, radii) |
+| [`src/styles/_variables.scss`](src/styles/_variables.scss) | Brand tokens (spacing, color, type) |
 | [`src/styles/_mixins.scss`](src/styles/_mixins.scss) | Shared mixins (`focus-ring`, `sr-only`, …) |
 | [`src/styles/global.scss`](src/styles/global.scss) | Base reset, `:root` CSS custom properties, `body` defaults |
 
@@ -151,7 +151,7 @@ Styles use **SCSS** with [`@use`](https://sass-lang.com/documentation/at-rules/u
 // or: @use '../styles/mixins' as *;
 ```
 
-Prefer **CSS custom properties** (`var(--color-text)`) in component styles so themes and dark mode can swap values on `:root` later without changing every file.
+Prefer **CSS custom properties** (`var(--color-ink)`) in component styles so a component reads the brand tokens from `:root`.
 
 ## Contributing & security
 

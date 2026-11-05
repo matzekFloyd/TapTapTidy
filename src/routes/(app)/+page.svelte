@@ -31,7 +31,7 @@
 			{signingOut ? 'Signing out…' : 'Sign out'}
 		</button>
 	</header>
-	<p class="lead">Chore tracking, coming soon.</p>
+	<p class="lead">Chores will show up here.</p>
 </main>
 
 <style lang="scss">
@@ -46,32 +46,34 @@
 	.masthead {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: baseline;
+		align-items: center;
 		gap: var(--space-md);
 		margin-bottom: var(--space-md);
 	}
 
 	h1 {
-		font-size: var(--font-size-lg);
 		margin: 0;
-		color: var(--color-text);
+		font-size: var(--font-size-tile);
+		font-weight: var(--font-weight-tile);
+		line-height: 1.2;
 		flex: 1 1 auto;
 	}
 
 	.user {
-		font-size: var(--font-size-base);
-		color: var(--color-text-muted);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 
 	.sign-out {
 		@include focus-ring;
 		font: inherit;
-		font-size: var(--font-size-base);
+		font-size: var(--font-size-tile);
+		font-weight: var(--font-weight-tile);
+		min-height: 2.75rem;
 		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-md);
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		color: var(--color-text);
+		border: 1px solid var(--color-ink);
+		background: var(--color-tile);
+		color: var(--color-ink);
 		cursor: pointer;
 
 		&:disabled {
@@ -80,13 +82,14 @@
 		}
 
 		&:not(:disabled):hover {
-			border-color: var(--color-accent);
-			color: var(--color-accent);
+			background: var(--color-wall);
 		}
 	}
 
 	.lead {
 		margin: 0;
-		color: var(--color-text-muted);
+		max-width: 65ch;
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 </style>

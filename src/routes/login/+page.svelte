@@ -44,11 +44,11 @@
 </script>
 
 <svelte:head>
-	<title>Sign in · {APP_NAME}</title>
+	<title>Sign in, {APP_NAME}</title>
 </svelte:head>
 
 <main class="auth-shell">
-	<div class="card">
+	<div class="panel">
 		<h1>Sign in</h1>
 		<p class="subtitle">Use your {APP_NAME} email and password.</p>
 
@@ -86,7 +86,7 @@
 		</form>
 
 		<p class="footer-link">
-			New here? <a href="/signup">Create an account</a>
+			New here? <a href="/signup">Sign up</a>
 		</p>
 	</div>
 </main>
@@ -102,26 +102,25 @@
 		padding: var(--space-xl) var(--space-md);
 	}
 
-	.card {
+	.panel {
 		width: 100%;
 		max-width: 22rem;
 		padding: var(--space-xl);
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+		background: var(--color-tile);
+		border: 1px solid var(--color-ink);
 	}
 
 	h1 {
-		font-size: var(--font-size-lg);
 		margin: 0 0 var(--space-xs);
-		color: var(--color-text);
+		font-size: var(--font-size-tile);
+		font-weight: var(--font-weight-tile);
+		line-height: 1.2;
 	}
 
 	.subtitle {
 		margin: 0 0 var(--space-lg);
-		color: var(--color-text-muted);
-		font-size: var(--font-size-base);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 
 	form {
@@ -137,37 +136,38 @@
 	}
 
 	label {
-		font-size: var(--font-size-base);
-		color: var(--color-text);
+		font-size: var(--font-size-body);
+		font-weight: var(--font-weight-body);
 	}
 
 	input {
 		@include focus-ring;
 		font: inherit;
+		font-size: var(--font-size-body);
+		min-height: 2.75rem;
 		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		border: 1px solid var(--color-border);
-		background: var(--color-bg);
-		color: var(--color-text);
+		border: 1px solid var(--color-ink);
+		background: var(--color-wall);
+		color: var(--color-ink);
 	}
 
 	.feedback {
 		margin: 0;
-		font-size: var(--font-size-base);
-		color: var(--color-text-muted);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 	}
 
 	.submit {
 		@include focus-ring;
 		font: inherit;
-		font-size: var(--font-size-base);
+		font-size: var(--font-size-tile);
+		font-weight: var(--font-weight-tile);
+		min-height: 2.75rem;
 		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-md);
-		border: none;
-		background: var(--color-accent);
-		color: #fff;
+		border: 1px solid var(--color-ink);
+		background: var(--color-tile);
+		color: var(--color-ink);
 		cursor: pointer;
-		font-weight: 600;
 
 		&:disabled {
 			opacity: 0.7;
@@ -175,20 +175,20 @@
 		}
 
 		&:not(:disabled):hover {
-			filter: brightness(1.05);
+			background: var(--color-wall);
 		}
 	}
 
 	.footer-link {
 		margin: var(--space-lg) 0 0;
-		font-size: var(--font-size-base);
-		color: var(--color-text-muted);
+		font-size: var(--font-size-body);
+		line-height: var(--line-height-body);
 		text-align: center;
 
 		a {
 			@include focus-ring;
-			color: var(--color-accent);
-			font-weight: 600;
+			font-weight: var(--font-weight-tile);
+			text-underline-offset: 0.15em;
 		}
 	}
 </style>

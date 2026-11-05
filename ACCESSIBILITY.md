@@ -35,7 +35,7 @@ Use the control's visible text as its accessible name. Do not add an `aria-label
 
 "Due" and "Overdue" are never color alone. Both words are visible on the tile face (`#F7F8F6`). "Due" is ink, about 15:1. "Overdue" is chili, about 5.1:1, and chili also turns the category mark. Do not put chili text on grout.
 
-Focus uses the `focus-ring` mixin: a 2px solid ink outline with offset, on top of the tile, including in Windows forced-colors mode. The leftover blue accent is not the focus color. Do not remove the outline.
+Focus uses the `focus-ring` mixin: a 2px solid ink outline with offset, on top of the tile, including in Windows forced-colors mode (`CanvasText` while forced colors are on). There is no separate focus color. Do not remove the outline.
 
 The doing tiles are the targets. Setup rows and fields are at least 44px tall. At 200% zoom the grid may collapse toward a single column and still has to work, without a horizontal page scroll. Line length for setup text stays under 65 characters.
 

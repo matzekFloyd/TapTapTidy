@@ -1,10 +1,10 @@
 # TapTapTidy brand
 
-Canonical color, type, and voice. Interaction and layout live in [DESIGN.md](DESIGN.md). Disability access lives in [ACCESSIBILITY.md](ACCESSIBILITY.md). When building UI, put these tokens in `src/styles/_variables.scss`. The current accent blue (`#2563eb`) is leftover and is not part of the brand.
+Canonical color, type, and voice. Interaction and layout live in [DESIGN.md](DESIGN.md). Disability access lives in [ACCESSIBILITY.md](ACCESSIBILITY.md). When building UI, put these tokens in `src/styles/_variables.scss`. Do not add a sixth color. Blue is not a brand, link, button, or focus color.
 
 ## What it is
 
-TapTapTidy is a tiled surface you clear by tapping. The brand should feel like enamel and grout: a wiped counter, a labeled door, a chore you can finish with one hand. It is a household tool. It is not a productivity suite, a wellness journal, or a launcher full of app icons.
+TapTapTidy is a tiled surface you clear by tapping. It should feel like enamel and grout: a wiped counter, a labeled door, a chore you can finish with one hand. The color comes from fruit and vegetables on that counter. Fresh work stays pale. Work that has gone over is chili. It is a household tool. It is not a productivity suite, a wellness journal, or a launcher full of app icons.
 
 The name is **TapTapTidy**. One word, three capital Ts. Do not set it in all caps, do not split it with dots or dashes, and do not park a tagline under it on every screen.
 
@@ -12,29 +12,31 @@ The name is **TapTapTidy**. One word, three capital Ts. Do not set it in all cap
 
 Plain verbs, sentence case, one job per line. The control and the result share a name: "Add a chore" adds it, "Archive" archives it, "Undo" puts it back. An empty screen tells the person what to do next. An error states what happened and how to fix it, without an apology and without a joke.
 
+A chore goes stale the way produce does. Say that in household words: "Due", "Overdue", "every 3 days". Do not rename a chore ripe, wilted, or fresh, and do not make a joke out of the fruit.
+
 Write "Dishes" and "every 3 days", not "interval" or "routine entity". Groups use their catalog names: Tidy, Clean, Admin, Health, Social, Other.
 
 ## Color
 
-Spend color on overdue and on the moment a routine is marked done. Everything else stays quiet. Groups do not get their own hues.
+Spend color on overdue and on the moment a routine is marked done. Everything else stays quiet. Groups do not get their own hues. These five colors are the palette.
 
-| token | hex | use |
-|-------|-----|-----|
-| wall | `#E6EEE9` | page ground, the field the grout sits in |
-| tile | `#F7F8F6` | tile face, setup surface |
-| grout | `#24302C` | the gap between doing tiles |
-| ink | `#1A2420` | text, icons, focus outline |
-| chili | `#B5453A` | overdue only: the mark and the word "Overdue" |
+| token | hex | taken from | use |
+|-------|-----|------------|-----|
+| wall | `#F0F2EF` | cabbage water | page ground, the field the grout sits in |
+| tile | `#F7F8F6` | pear flesh | tile face, setup surface |
+| grout | `#24302C` | avocado skin | the gap between doing tiles |
+| ink | `#1A2420` | kale | text, icons, focus outline |
+| chili | `#B5453A` | dried chili | overdue only: the mark and the word "Overdue" |
 
 "Due" is ink, not a sixth color. Marking a chore done turns that tile to wall. There is no success color.
 
-Ink on tile is about 15:1. Chili on tile is about 5.1:1, so the word "Overdue" is readable on the tile face. Do not put chili text on grout (about 2.5:1). Do not invent a sixth color for links, focus, or a second status.
+Ink on tile is about 15:1. Chili on tile is about 5.1:1, so the word "Overdue" is readable on the tile face. Do not put chili text on grout (about 2.5:1). Do not invent a sixth color for links, focus, or a second status. Links are ink and underlined.
 
 The gap between doing tiles is grout, a structural line. Tiles are not floating cards and do not carry a drop shadow.
 
 ## Type
 
-The family is not chosen. Use the system sans already in `src/styles/_variables.scss` until it is. Do not introduce a grotesque as a stand-in, and do not add a display face, a monospace face, or italics that highlight a single word.
+The family is **Zilla Slab**, self-hosted from `src/styles/fonts` under the SIL Open Font License. One roman family for the whole product. It is the lettering on a crate label: a slab you can read on a tile while standing. It is not a grotesque stand-in. There is no display face, no monospace face, and no italics on a single word.
 
 | role | weight | size | notes |
 |------|--------|------|-------|
@@ -42,7 +44,7 @@ The family is not chosen. Use the system sans already in `src/styles/_variables.
 | Setup body | 400 | 1rem | line-height 1.5, line length under 65 characters |
 | Chore name on the edit panel | 600 | about 2rem | the one large line on that screen |
 
-Sentence case for everything except the product name. When a family is chosen, self-host one family and keep these roles.
+Sentence case for everything except the product name. The shipped files are roman 400, 500, and 600. Do not add a second family.
 
 ## Marks
 
