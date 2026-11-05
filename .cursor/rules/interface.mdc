@@ -1,0 +1,29 @@
+---
+description: TapTapTidy interface, brand, and disability access for UI and chore interactions
+alwaysApply: true
+---
+
+# Interface
+
+Before adding or changing screens, routes, copy, or chore interactions, follow:
+
+- [DESIGN.md](../../DESIGN.md) — doing grid and Setup
+- [BRAND.md](../../BRAND.md) — color, Familjen Grotesk, voice
+- [ACCESSIBILITY.md](../../ACCESSIBILITY.md) — keyboard, screen reader, visible Due and Overdue
+
+Land brand tokens in `src/styles/_variables.scss`. Do not invent a parallel palette or a third view. Where a visual choice and ACCESSIBILITY.md disagree, ACCESSIBILITY.md wins. The desktop web app has to work with a keyboard alone and with Narrator or NVDA. Android and iOS, later, have to expose the same names and actions.
+
+- Two views: **Doing** marks a routine done. **Setup** adds, renames, reschedules, moves, and archives. A doing tap never edits.
+- Two levels: a fixed group, then a routine. Groups are the read-only catalog (`tidy`, `clean`, `admin`, `health`, `social`, `other`). People choose a group. They do not create or rename one.
+- The app is a column at most 27.5rem wide on the wall color. A thin strip above the grid holds the heading, Back, and Setup. Tile count picks the split; an odd last tile spans the row. Past six routines, rows scroll and still span the width.
+- A group tile is its catalog icon plus its name, in one of three states: Settled (no status word), Due (the word in ink), or Overdue (chili mark and the word). Overdue wins. A routine completes on click, turns to the wall color, then leaves. Remaining tiles keep order (overdue, then due, then older `created_at`) and grow. Undo is immediate. Whole-day intervals are local calendar days.
+- Tiles are native buttons in the tab order. Escape goes back. Do not rely on hover, and do not use color as the only overdue signal.
+- The doing grid shows due and overdue routines. Resting ones sit under "Not yet". Color means time: chili `#B5453A` is overdue only.
+- Setup lists every active routine in a group. The edit panel asks for name and interval (`interval_days`, in days). Archive sets `archived_at`.
+
+```svelte
+<!-- Doing: one action per tile -->
+<button type="button" onclick={markDone}>Dishes</button>
+
+<!-- Setup owns edit, move, and archive -->
+```
