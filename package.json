@@ -28,7 +28,7 @@
 		"supabase:remote:push": "node scripts/supabase-remote-push.mjs"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^4.0.0",
+		"@sveltejs/adapter-static": "^4.0.1",
 		"@sveltejs/kit": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"sass": "^1.99.0",
